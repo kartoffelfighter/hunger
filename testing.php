@@ -5,6 +5,7 @@ include 'vendor/autoload.php';
 $parser = new \Smalot\PdfParser\Parser();
 
 $keywords = array("Montag","Dienstag","Mittwoch","Donnerstag","Freitag");
+$regex_keywords = array("M\s*o\s*n\s*t\s*a\s*g","D\s*i\s*e\s*n\s*s\s*t\s*a\s*g","M\s*i\s*t\s*t\s*w\s*o\s*c\s*h","D\s*o\s*n\s*n\s*e\s*r\s*s\s*t\s*a\s*g","F\s*r\s*e\s*i\s*t\s*a\s*g");
 
 $names_to_pdfids = array(
     1 => "Naser",
@@ -12,49 +13,15 @@ $names_to_pdfids = array(
 );
 
 
+// new dees pdf crawler
+$data = file_get_contents("http://www.metzgerei-dees.de/"); // get source from site
+$hyperfile = htmlspecialchars($data);   
+preg_match("/metzgerei-dees.de\/wp-content\/themes\/metzgereidees\/uploads\/m(.+)pdf/isU", $hyperfile, $deeslink);  // regex to search for menu[].pdf
+////echo $deeslink[0];  //
+$deesstring = "http://www."; // build link string
+$deesstring .= $deeslink[0];
 
 
-// link zu dees (der nicht immer gleich ist)
-$weeknumber = preg_replace("/\\b0*/","",date("W"));
-
-// Montag der Woche:
-$wochentag=strftime("%w",mktime(0,0,0,date("m"),date("d"),date("Y")))-1; 
-if($wochentag==-1) $wochentag=6; 
-$monday =  date("d.m",mktime(0,0,0,date("m"),date("d")-$wochentag,date("Y"))); 
-$friday = substr($monday, 0, 2)+5;
-$friday .= date(".m.Y");
-$wochenstring = date("Y-");
-
-$deesstring = "http://www.metzgerei-dees.de/wp-content/themes/MetzgereiDees/uploads/Menüplan-für-die-Woche-KW-";
-$deesstring .= $weeknumber;
-$deesstring .= date("-Y-");
-$deesstring .= $monday;
-$deesstring .= "-";
-$deesstring .= $friday;
-$deesstring .= "-neu.pdf";
-//echo "<br> deesstring: <b> $deesstring </b>";
-//$links_to_pdfs[2] = $deesstring;
-////////////////////////////////////
-
-$iii = 1;
-while (1) {
-    $try_for_404 = get_headers($deesstring, 1);
-    if($try_for_404[0] != "HTTP/1.1 404 Not Found") {
-        break;
-    }
-    if($try_for_404[0] == "HTTP/1.1 404 Not Found") {
-        $deesstring = "http://www.metzgerei-dees.de/wp-content/themes/MetzgereiDees/uploads/Menüplan-für-die-Woche-KW-";
-        $deesstring .= $weeknumber;
-        $deesstring .= date("-Y-");
-        $deesstring .= $monday;
-        $deesstring .= "-";
-        $deesstring .= $friday;
-        $deesstring .= "-neu-";
-        $deesstring .= $iii;
-        $deesstring .= ".pdf";
-}
-    $iii++;
-}
 
 $links_to_pdfs = array(
     1 => "http://www.wurstnaser.de/Speiseplan1.pdf",
@@ -75,7 +42,7 @@ for ($currentPdf = 1; $currentPdf <= count($links_to_pdfs); $currentPdf++) {
         if (is_array($value)) {
            $value = implode(', ', $value);
         }
-        echo $property . ' => ' . $value . "<br>";
+        //echo $property . ' => ' . $value . "<br>";
     }
 */
 // text
@@ -86,39 +53,39 @@ for ($currentPdf = 1; $currentPdf <= count($links_to_pdfs); $currentPdf++) {
 
 
 //var_dump($allMenues[2]);
-//echo "<br>";
+////echo "<br>";
 
 $parsedMenu = array();
 // $parsedMenu[Tag][Hersteller][Item] = {Inhalt}
 
 // regex für dees: 
-array_push($keywords, "geni");
-for($ii = 0; $ii <= count($keywords) - 2; $ii++) {
-    echo "<b>$keywords[$ii]:</b><br>";
-preg_match("/".$keywords[0]."(.+)geni/isU", $allMenues[2], $output_array);
-preg_match("/".$keywords[$ii]."(.+)".$keywords[$ii+1]."/isU", $output_array[0], $output_array1);
-preg_match("/".$keywords[$ii]."(.+)€/isU", $output_array1[0], $output_array2);
-preg_match("/€(.+)€/isU", $output_array1[0], $output_array3);
-echo($output_array2[1]);
-$parsedMenu[$keywords[$ii]]["2"]["1"] = $output_array2[1];
-echo "<br>";
-echo($output_array3[1]);
-$parsedMenu[$keywords[$ii]]["2"]["2"] = $output_array3[1];
-echo "<br>";
+array_push($regex_keywords, "g\s*e\s*n\s*i");
+for($ii = 0; $ii <= count($regex_keywords) - 2; $ii++) {
+    //echo "<b>$keywords[$ii]:</b><br>";
+    preg_match("/".$regex_keywords[0]."(.+)g\s*e\s*n\s*i/isU", $allMenues[2], $output_array);
+    preg_match("/".$regex_keywords[$ii]."(.+)".$regex_keywords[$ii+1]."/isU", $output_array[0], $output_array1);
+    preg_match("/".$regex_keywords[$ii]."(.+)€/isU", $output_array1[0], $output_array2);
+    preg_match("/€(.+)€/isU", $output_array1[0], $output_array3);
+    //echo($output_array2[1]);
+    $parsedMenu[$keywords[$ii]]["2"]["1"] = $output_array2[1];
+    //echo "<br>";
+    //echo($output_array3[1]);
+    $parsedMenu[$keywords[$ii]]["2"]["2"] = $output_array3[1];
+    //echo "<br>";
 }
 
 
-/*
+
 // regex für Naser:
 //var_dump($allMenues[1]);
-echo "<br>";
-array_pop($keywords);
-array_push($keywords, "essen");
+//echo "<br>";
+array_pop($regex_keywords);
+array_push($regex_keywords, "essen");
 
-for($ii = 0; $ii <= count($keywords) - 2; $ii++) {
-    echo "<b>$keywords[$ii]:</b><br>";
+for($ii = 0; $ii <= count($regex_keywords) - 2; $ii++) {
+    //echo "<b>$keywords[$ii]:</b><br>";
 preg_match("/Tagesessen(.+)rungen/isU", $allMenues[1], $output_array);
-preg_match("/".$keywords[$ii]."(.+)".$keywords[$ii+1]."/isU", $output_array[0], $output_array1);
+preg_match("/".$regex_keywords[$ii]."(.+)".$regex_keywords[$ii+1]."/isU", $output_array[0], $output_array1);
 //var_dump($output_array1);
 
 // Tagesgericht 1
@@ -127,30 +94,29 @@ preg_match("/1(.+)2/isU", $output_array1[0], $output_array2);
 // Tagesgericht 2
 preg_match("/2(.+)\b/ism", $output_array1[0], $output_array3);
 preg_match("/2(.+)\b/ism", $output_array3[1], $output_array4);
-preg_match("/2(.+)".$keywords[$ii+1]."/ism", $output_array4[1], $output_array5);
-preg_match("/2(.+)".$keywords[$ii+1]."/ism", $output_array5[1], $output_array6);
+preg_match("/2(.+)".$regex_keywords[$ii+1]."/ism", $output_array4[1], $output_array5);
+preg_match("/2(.+)".$regex_keywords[$ii+1]."/ism", $output_array5[1], $output_array6);
 
 
-echo($output_array2[1]);
-$parsedMenu[$keywords[$ii]]["1"]["1"] = $output_array2[1];
+//echo($output_array2[1]);
+$parsedMenu[$regex_keywords[$ii]]["1"]["1"] = $output_array2[1];
 
-echo "<br>";
+//echo "<br>";
 if(!empty($output_array6)) {
-    echo($output_array6[1]);
+    ////echo($output_array6[1]);
     $parsedMenu[$keywords[$ii]]["1"]["2"] = $output_array6[1];
 }
 elseif(!empty($output_array5)){
-    preg_match("/2(.+)".$keywords[$ii+1]."/ism", $output_array4[1], $output_array5);
-    echo($output_array5[1]);
+    preg_match("/2(.+)".$regex_keywords[$ii+1]."/ism", $output_array4[1], $output_array5);
+    ////echo($output_array5[1]);
     $parsedMenu[$keywords[$ii]]["1"]["2"] = $output_array5[1];
 }
 else {
-    preg_match("/2(.+)".$keywords[$ii+1]."/ism", $output_array3[1], $output_array4);
-    echo($output_array4[1]);
+    preg_match("/2(.+)".$regex_keywords[$ii+1]."/ism", $output_array3[1], $output_array4);
+    ////echo($output_array4[1]);
     $parsedMenu[$keywords[$ii]]["1"]["2"] = $output_array4[1];
 }
-echo "<br>";
+//echo "<br>";
 }
 
 //var_dump($parsedMenu);
-*/

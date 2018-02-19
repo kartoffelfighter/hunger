@@ -224,6 +224,7 @@ array_pop($regex_keywords);       // letztes word wieder aus den keywords lösch
           <br>
           <p>Ich stehe in keiner Verbindung zu den o.g. Restaurants/Metzgereien/Bistros etc. <br> Ich beziehe durch diese Seite keine Vorzüge. <br> Diese Seite dient ledeglich der Information.<br>Alle Angaben ohne Gewähr</p>
           <br>
+          <a href="https://github.com/kartoffelfighter/hunger">get the source code</a><br>
           <small class="text-light">Impressum: Verantwortlich für den Inhalt dieser Seite (sofern nicht automatisch durch algorithmen ausgewerterte Informationen): Marc Fischer (Kontakt: marc{a}marcfischer.org)</small>
         </div>
       </div>

@@ -27,10 +27,16 @@ $deesstring = "http://www."; // build link string
 $deesstring .= $deeslink[0];
 
 
+
 $links_to_pdfs = array(
   1 => "http://www.wurstnaser.de/Speiseplan1.pdf",
   2 => $deesstring           //"http://www.metzgerei-dees.de/wp-content/themes/MetzgereiDees/uploads/Menüplan-für-die-Woche-KW-7-2018-12.02-17.02.2018-neu.pdf"
 );
+
+if (strlen($deesstring) >= 200) {
+  array_pop($links_to_pdfs);
+  $error = 1;         // throw error, if dees didn't upload a correct pdf (f.e. .docx instead)
+}
 
 
 // init arrays
@@ -161,6 +167,12 @@ array_pop($regex_keywords);       // letztes word wieder aus den keywords lösch
 
       };
       ?>
+      <?php if($error > 0){
+        ?>
+        <a class="nav-link text-danger" href="#">Keine gültige PDF von "dees"</a>
+        <?php
+      }
+      ?>
       </nav>
     </div>
 
@@ -182,18 +194,22 @@ array_pop($regex_keywords);       // letztes word wieder aus den keywords lösch
         <h6 class="border-bottom border-gray pb-2 mb-0"><?php echo $keywords[$i]; ?></h6>
         <div class="media text-muted pt-3">
           <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-            <strong class="d-block text-gray-dark">Dees</strong>
-            Essen 1: <?php echo $parsedMenu[$keywords[$i]]["2"]["1"]; ?><br>
-            Essen 2: <?php echo $parsedMenu[$keywords[$i]]["2"]["2"]; ?>
-          </p>
-        </div>
-        <div class="media text-muted pt-3">
-          <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
             <strong class="d-block text-gray-dark">Naser</strong>
             Essen 1: <?php echo $parsedMenu[$keywords[$i]]["1"]["1"]; ?> 5,40€<br>
             Essen 2: <?php echo $parsedMenu[$keywords[$i]]["1"]["2"]; ?> 4,50€
           </p>
         </div>
+        <?php if($error < 1) { ?>
+        <div class="media text-muted pt-3">
+          <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+            <strong class="d-block text-gray-dark">Dees</strong>
+            Essen 1: <?php echo $parsedMenu[$keywords[$i]]["2"]["1"]; ?><br>
+            Essen 2: <?php echo $parsedMenu[$keywords[$i]]["2"]["2"]; ?>
+          </p>
+        </div>
+        <?php 
+        }
+        ?>
       </div>
     <?php 
   }; ?>

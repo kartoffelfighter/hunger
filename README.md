@@ -1,3 +1,6 @@
+# discontinued
+since my local bistros keep changing their websites and i have no spare time to maintain the code, i temporary discontinued this projekt
+
 # hunger
 pdf parser to crawl local bistros for lunch menues
 
